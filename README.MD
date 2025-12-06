@@ -24,11 +24,6 @@ pip install -r requirements.txt
 # Execute o jogo
 python main.py
 
-
-## **Versão Simplificada (apenas To-Do List)**
-
-Se preferir algo mais direto, aqui está apenas a seção de progresso:
-
 ```markdown
 ## 📋 Checklist de Implementação
 
