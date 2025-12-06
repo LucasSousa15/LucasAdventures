@@ -1,2 +1,44 @@
+# ================================
+# PROJETO LUCAS ADVENTURE
+# ================================
+
+# Assets do jogo (NÃO SUBIR PARA GIT)
+/assets/
+!/assets/README.md  # Exceto um arquivo READ.md explicativo se quiser
 
 clean.py
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.spec
+
+# Executáveis
+*.exe
+*.msi
+*.app
+*.dmg
+*.pkg
