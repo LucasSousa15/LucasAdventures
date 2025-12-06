@@ -1,9 +1,8 @@
-
 import pygame
 from abc import ABC, abstractmethod
 
 class GraphicsAdapter(ABC):
-    
+    """Interface para diferentes backends gráficos"""
     
     @abstractmethod
     def init_display(self, width, height, title):
@@ -30,7 +29,7 @@ class GraphicsAdapter(ABC):
         pass
 
 class PygameGraphicsAdapter(GraphicsAdapter):
-    
+    """Adapter concreto para Pygame"""
     
     def __init__(self):
         self.screen = None
@@ -49,7 +48,8 @@ class PygameGraphicsAdapter(GraphicsAdapter):
         if sprite and self.screen:
             if flip:
                 sprite = pygame.transform.flip(sprite, True, False)
-            self.screen.blit(sprite, (x, y))
+            # Garante que as coordenadas sejam inteiras para melhor performance
+            self.screen.blit(sprite, (int(x), int(y)))
     
     def draw_rect(self, color, rect, width=0):
         pygame.draw.rect(self.screen, color, rect, width)
@@ -60,7 +60,7 @@ class PygameGraphicsAdapter(GraphicsAdapter):
         else:
             font_obj = font
         text_surface = font_obj.render(text, True, color)
-        self.screen.blit(text_surface, (x, y))
+        self.screen.blit(text_surface, (int(x), int(y)))
     
     def update_display(self):
         pygame.display.flip()

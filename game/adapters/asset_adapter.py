@@ -1,10 +1,9 @@
-
 import pygame
 import os
 from abc import ABC, abstractmethod
 
 class AssetAdapter(ABC):
-    
+    """Interface para diferentes tipos de carregamento de assets"""
     
     @abstractmethod
     def load_image(self, path, use_alpha=True):
@@ -15,16 +14,21 @@ class AssetAdapter(ABC):
         pass
 
 class PygameAssetAdapter(AssetAdapter):
-    
+    """Adapter concreto para Pygame"""
     
     def load_image(self, path, use_alpha=True):
         try:
             if use_alpha:
-                return pygame.image.load(path).convert_alpha()
-            return pygame.image.load(path).convert()
-        except Exception as e:
+                image = pygame.image.load(path).convert_alpha()
+            else:
+                image = pygame.image.load(path).convert()
+            return image
+        except pygame.error as e:
             print(f"Erro ao carregar imagem {path}: {e}")
-            return self._create_fallback_surface()
+            return self._create_fallback_surface(800, 600, (100, 100, 255))
+        except Exception as e:
+            print(f"Erro inesperado ao carregar {path}: {e}")
+            return self._create_fallback_surface(800, 600, (255, 100, 100))
     
     def load_animation_frames(self, folder, animation_name, frame_count):
         frames = []
@@ -33,8 +37,7 @@ class PygameAssetAdapter(AssetAdapter):
             frames.append(self.load_image(frame_path))
         return frames
     
-    def _create_fallback_surface(self):
-        
-        surf = pygame.Surface((64, 64))
-        surf.fill((255, 0, 255))  # Magenta para destacar
+    def _create_fallback_surface(self, width=64, height=64, color=(255, 0, 255)):
+        surf = pygame.Surface((width, height))
+        surf.fill(color)
         return surf

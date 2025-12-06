@@ -1,21 +1,22 @@
-
 import pygame
 from game.adapters import KeyboardInputAdapter, PygameGraphicsAdapter, PygameAssetAdapter
 from game.utils.config import GameConfig
 
 class Game:
     def __init__(self):
-
+        # Inicializa os adapters
         self.graphics_adapter = PygameGraphicsAdapter()
         self.input_adapter = KeyboardInputAdapter()
         self.asset_adapter = PygameAssetAdapter()
-
+        
+        # Configura a tela
         self.screen = self.graphics_adapter.init_display(
             GameConfig.SCREEN_WIDTH,
             GameConfig.SCREEN_HEIGHT,
             "Lucas Adventure - Demo"
         )
-
+        
+        # Estado do jogo - importação local para evitar circular
         from game.states.menu_state import MenuState
         self.running = True
         self.state = MenuState(self)
@@ -26,11 +27,14 @@ class Game:
     def run(self):
         while self.running:
             delta_time = self.graphics_adapter.get_delta_time()
-
+            
+            # Processa eventos
             self.state.handle_events()
-
+            
+            # Atualiza lógica
             self.state.update(delta_time)
-
+            
+            # Renderiza
             self.state.render()
         
         pygame.quit()
