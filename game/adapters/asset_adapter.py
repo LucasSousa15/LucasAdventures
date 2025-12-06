@@ -3,7 +3,7 @@ import os
 from abc import ABC, abstractmethod
 
 class AssetAdapter(ABC):
-    """Interface para diferentes tipos de carregamento de assets"""
+    
     
     @abstractmethod
     def load_image(self, path, use_alpha=True):
@@ -14,7 +14,7 @@ class AssetAdapter(ABC):
         pass
 
 class PygameAssetAdapter(AssetAdapter):
-    """Adapter concreto para Pygame"""
+    
     
     def load_image(self, path, use_alpha=True):
         try:

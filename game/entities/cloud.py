@@ -1,47 +1,50 @@
+
 import pygame
 import random
 from game.utils.config import GameConfig
 
 class Cloud:
-    def __init__(self, asset_adapter):
+    def __init__(self, asset_adapter, world_width):
         self.asset_adapter = asset_adapter
+        self.world_width = world_width
         self.image = self.load_image()
-        
-        # Tamanho aleatório para variedade
-        scale = random.uniform(0.5, 1.2)
+
+        scale = random.uniform(0.15, 0.25)  # Nuvens bem menores
         self.width = int(self.image.get_width() * scale)
         self.height = int(self.image.get_height() * scale)
         self.image = pygame.transform.scale(self.image, (self.width, self.height))
-        
-        # Posição inicial aleatória
-        self.x = random.randint(0, GameConfig.SCREEN_WIDTH)
-        self.y = random.randint(50, 400)  # Nuvens no topo da tela
-        
-        # Velocidade aleatória (nuvens maiores mais devagar para efeito parallax)
-        self.speed = GameConfig.CLOUD_SPEED * random.uniform(0.3, 0.8) / scale
-        self.opacity = random.randint(180, 255)
-        
-        # Cria uma cópia da imagem com opacidade
+
+        self.x = random.randint(0, world_width)
+        self.y = random.randint(50, 250)  # Mais alto na tela
+
+        self.speed = random.uniform(0.1, 0.3)  # Mais devagar
+        self.opacity = random.randint(150, 220)  # Mais transparente
         self.image.set_alpha(self.opacity)
     
     def load_image(self):
-        """Carrega a imagem da nuvem"""
+        
         path = GameConfig.asset_path("cloud", "clean.png")
         return self.asset_adapter.load_image(path)
     
-    def update(self, player_dx):
-        """Atualiza posição baseada no movimento do jogador"""
-        # Nuvens se movem na direção oposta ao jogador (parallax)
-        self.x -= player_dx * self.speed * 0.3
+    def update(self, camera_offset_x):
         
-        # Reseta posição se sair da tela
-        if self.x < -self.width:
-            self.x = GameConfig.SCREEN_WIDTH
-            self.y = random.randint(50, 400)
-        elif self.x > GameConfig.SCREEN_WIDTH:
-            self.x = -self.width
-            self.y = random.randint(50, 400)
+
+        self.screen_x = self.x - camera_offset_x * self.speed
+
+        if self.screen_x < -self.width:
+            self.x += self.world_width + self.width + random.randint(100, 300)
+            self.y = random.randint(50, 250)
+            self.screen_x = self.x - camera_offset_x * self.speed
+        elif self.screen_x > GameConfig.SCREEN_WIDTH:
+            self.x -= self.world_width + self.width + random.randint(100, 300)
+            self.y = random.randint(50, 250)
+            self.screen_x = self.x - camera_offset_x * self.speed
     
-    def draw(self, graphics_adapter):
-        """Desenha a nuvem"""
-        graphics_adapter.draw_sprite(self.image, self.x, self.y)
+    def draw(self, graphics_adapter, camera_offset_x):
+        
+
+        screen_x = self.x - camera_offset_x * self.speed
+        screen_y = self.y
+
+        if screen_x + self.width > -100 and screen_x < GameConfig.SCREEN_WIDTH + 100:
+            graphics_adapter.draw_sprite(self.image, screen_x, screen_y)

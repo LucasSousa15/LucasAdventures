@@ -13,8 +13,7 @@ class MenuState(GameState):
     def handle_events(self):
         if self.game.input_adapter.should_quit():
             self.game.running = False
-        
-        # Processar entrada do teclado diretamente aqui
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.game.running = False
@@ -30,11 +29,11 @@ class MenuState(GameState):
     
     def select_option(self):
         if self.selected_option == 0:  # Jogar
-            # Importação local para evitar circular
+
             from .game_state import GameState as PlayState
             self.change_state(PlayState(self.game))
         elif self.selected_option == 1:  # Controles
-            # Poderia mudar para um estado de controles
+
             print("Mostrando controles...")
         elif self.selected_option == 2:  # Sair
             self.game.running = False
@@ -43,22 +42,19 @@ class MenuState(GameState):
         pass
     
     def render(self):
-        # Fundo
+
         self.game.graphics_adapter.clear(GameConfig.SKY_BLUE)
-        
-        # Título
+
         title = self.font.render("LUCAS ADVENTURE", True, (255, 215, 0))
         title_rect = title.get_rect(center=(GameConfig.SCREEN_WIDTH//2, 200))
         self.game.graphics_adapter.draw_sprite(title, title_rect.x, title_rect.y)
-        
-        # Opções do menu
+
         for i, option in enumerate(self.options):
             color = (255, 255, 255) if i == self.selected_option else (200, 200, 200)
             text = self.font.render(option, True, color)
             text_rect = text.get_rect(center=(GameConfig.SCREEN_WIDTH//2, 400 + i*100))
             self.game.graphics_adapter.draw_sprite(text, text_rect.x, text_rect.y)
-        
-        # Controles
+
         controls = [
             "← → : Mover",
             "ESPAÇO : Pular",

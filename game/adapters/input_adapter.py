@@ -2,25 +2,25 @@ import pygame
 from abc import ABC, abstractmethod
 
 class InputAdapter(ABC):
-    """Interface para diferentes esquemas de controle"""
+    
     
     @abstractmethod
     def get_movement(self):
-        """Retorna (dx, dy, jump_pressed)"""
+        
         pass
     
     @abstractmethod
     def get_menu_input(self):
-        """Retorna entrada para menus"""
+        
         pass
     
     @abstractmethod
     def should_quit(self):
-        """Retorna True se o jogo deve fechar"""
+        
         pass
 
 class KeyboardInputAdapter(InputAdapter):
-    """Adapter para controle por teclado"""
+    
     
     def __init__(self, config=None):
         self.config = config or {
