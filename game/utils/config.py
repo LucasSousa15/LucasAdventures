@@ -18,9 +18,19 @@ class GameConfig:
     GRAVITY = 1.0
     PLAYER_SPEED = 8
     JUMP_STRENGTH = -20
-    GROUND_LEVEL = 1080 - 150  # Altura do chão
+    GROUND_LEVEL = 1080 - 150
 
-    CLOUD_COUNT = 10  # Mais nuvens para melhor cobertura
-    BACKGROUND_SCROLL_SPEED = 0.05  # Parallax do fundo
+    CLOUD_COUNT = 10
+    BACKGROUND_SCROLL_SPEED = 0.05
 
-    LEVEL_WIDTH = 10000  # Largura total do nível (ajustável)
+    LEVEL_WIDTH = 50000
+
+    COIN_COUNT = 30  # Mais moedas
+    COIN_ANIMATION_SPEED = 0.15
+    COIN_VALUE = 10
+    COIN_SPAWN_MIN_X = 100
+    COIN_SPAWN_MAX_X = 4900
+    COIN_SPAWN_MIN_Y = 400 
+    COIN_SPAWN_MAX_Y = 700  
+    COIN_SIZE = 100  # 
+    COIN_HITBOX_SCALE = 0.7  

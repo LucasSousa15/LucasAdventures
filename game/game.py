@@ -1,5 +1,6 @@
+# game/game.py
 import pygame
-from game.adapters import KeyboardInputAdapter, PygameGraphicsAdapter, PygameAssetAdapter
+from game.adapters import KeyboardInputAdapter, PygameGraphicsAdapter, PygameAssetAdapter, PygameAudioAdapter
 from game.utils.config import GameConfig
 
 class Game:
@@ -8,15 +9,19 @@ class Game:
         self.graphics_adapter = PygameGraphicsAdapter()
         self.input_adapter = KeyboardInputAdapter()
         self.asset_adapter = PygameAssetAdapter()
+        # self.audio_adapter = PygameAudioAdapter()  
         
         # Configura a tela
         self.screen = self.graphics_adapter.init_display(
             GameConfig.SCREEN_WIDTH,
             GameConfig.SCREEN_HEIGHT,
-            "Lucas Adventure - Demo"
+            "Lucas Adventure - Coletáveis"
         )
         
-        # Estado do jogo - importação local para evitar circular
+        # Toca música de fundo (opcional)
+        # self.audio_adapter.play_music("background", volume=0.3)
+        
+        # Estado do jogo
         from game.states.menu_state import MenuState
         self.running = True
         self.state = MenuState(self)

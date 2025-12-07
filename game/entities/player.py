@@ -121,3 +121,25 @@ class Player:
             "action": self.action,
             "flip": self.flip
         }
+    
+    draw_hitbox = False  
+    
+    def draw(self, graphics_adapter, camera_offset_x=0):
+        
+        img = self.image
+        if self.flip: 
+            img = pygame.transform.flip(img, True, False)
+
+        draw_x = self.rect.x - camera_offset_x + (self.rect.width // 2) - (img.get_width() // 2)
+        draw_y = self.rect.bottom - img.get_height()
+        
+        graphics_adapter.draw_sprite(img, draw_x, draw_y)
+
+        if Player.draw_hitbox:
+            debug_rect = pygame.Rect(
+                self.rect.x - camera_offset_x,
+                self.rect.y,
+                self.rect.width,
+                self.rect.height
+            )
+            graphics_adapter.draw_rect((0, 255, 0), debug_rect, 2)

@@ -52,8 +52,3 @@ Se preferir algo mais direto, aqui está apenas a seção de progresso:
 7. **Polimento visual** - Melhorar animações e efeitos
 8. **Compilar para EXE** - Criar executável para entrega
 
-### 📅 **PRAZOS ESTIMADOS**
-- Semana 1: Inimigos e sistema de pontuação
-- Semana 2: Sons e tela de Game Over
-- Semana 3: Polimento final e testes
-- Semana 4: Compilação e documentação final

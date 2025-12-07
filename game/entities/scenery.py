@@ -11,8 +11,7 @@ class Scenery:
         self.load_ground()
         self.clouds = []
 
-        for _ in range(GameConfig.CLOUD_COUNT):
-            self.clouds.append(Cloud(asset_adapter, GameConfig.LEVEL_WIDTH))
+        self.init_clouds()
     
     def load_background(self):
         
@@ -42,6 +41,13 @@ class Scenery:
         
         self.tile_width = self.ground_tile.get_width()
         self.ground_copies = (GameConfig.LEVEL_WIDTH // self.tile_width) + 2
+    
+    def init_clouds(self):
+        
+        self.clouds = []
+        for _ in range(GameConfig.CLOUD_COUNT):
+            cloud = Cloud(self.asset_adapter, GameConfig.LEVEL_WIDTH)
+            self.clouds.append(cloud)
     
     def update(self, camera_offset_x):
         
@@ -78,10 +84,7 @@ class Scenery:
         
 
         bg_offset_x = camera_offset_x * GameConfig.BACKGROUND_SCROLL_SPEED
-        start_bg_tile = int(bg_offset_x / self.bg_width)
-        for i in range(start_bg_tile - 1, start_bg_tile + 3):
-            x = i * self.bg_width - bg_offset_x
-            graphics_adapter.draw_sprite(self.background, x, 0)
+        self.draw_background(graphics_adapter, bg_offset_x)
 
         self.draw_clouds(graphics_adapter, camera_offset_x)
 
