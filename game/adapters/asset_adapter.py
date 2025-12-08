@@ -37,6 +37,37 @@ class PygameAssetAdapter(AssetAdapter):
             frames.append(self.load_image(frame_path))
         return frames
     
+    def get_obstacle_asset(self, obstacle_type, frame_index):
+
+        folder = self._resolve_obstacle_folder(obstacle_type)
+        if folder is None:
+            print(f"[ERRO] Pasta de obstáculo '{obstacle_type}' não encontrada.")
+            return None
+
+        path = os.path.join(folder, f"{frame_index}.png")
+
+        if not os.path.exists(path):
+            return None  # deixa o obstacle.py lidar com placeholder
+
+        try:
+            return pygame.image.load(path).convert_alpha()
+        except Exception as e:
+            print(f"[ERRO] Falha ao carregar frame '{path}': {e}")
+            return None
+        
+    def _resolve_obstacle_folder(self, obstacle_type):
+        base_assets = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+            "assets"
+        )
+
+        folder = os.path.join(base_assets, obstacle_type)
+
+        if os.path.isdir(folder):
+            return folder
+        
+        return None
+    
     def _create_fallback_surface(self, width=64, height=64, color=(255, 0, 255)):
         surf = pygame.Surface((width, height))
         surf.fill(color)
