@@ -3,7 +3,7 @@
 # ================================
 
 # Assets do jogo (NÃO SUBIR PARA GIT)
-/assets/
+
 !/assets/README.md  # Exceto um arquivo READ.md explicativo se quiser
 
 clean.py

@@ -121,7 +121,10 @@ class Player:
         graphics_adapter.draw_sprite(img, draw_x, draw_y)
         
         # Debug: mostra hitbox
-        if self.draw_hitbox:
+        # Always show hitbox when debug collisions are enabled
+        from game.utils.config import GameConfig
+        show_hit = self.draw_hitbox or getattr(GameConfig, "DEBUG_SHOW_COLLISIONS", False)
+        if show_hit:
             debug_rect = pygame.Rect(
                 self.rect.x,
                 self.rect.y,

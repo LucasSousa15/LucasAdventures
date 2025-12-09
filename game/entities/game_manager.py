@@ -39,13 +39,34 @@ class GameManager:
         except:
             pass
     
-    def spawn_obstacle(self):
-        
+    def spawn_obstacle(self, player_rect=None):
 
         obstacle_type = random.choice(['cactus', 'bird'])
 
-        obstacle = Obstacle(obstacle_type, self.asset_adapter)
+        # If we have the player's rect, compute obstacle size dynamically
+        # so obstacles scale relative to the player's current hitbox.
+        size_override = None
+        try:
+            if player_rect is not None:
+                if obstacle_type == 'cactus':
+                    w = max(8, int(player_rect.width * GameConfig.PLAYER_TO_CACTUS_RATIO))
+                    h = max(8, int(player_rect.height * GameConfig.PLAYER_TO_CACTUS_RATIO))
+                else:  # bird
+                    w = max(8, int(player_rect.width * GameConfig.PLAYER_TO_BIRD_RATIO))
+                    h = max(8, int(player_rect.height * GameConfig.PLAYER_TO_BIRD_RATIO))
+                size_override = (w, h)
+        except Exception:
+            size_override = None
+
+        obstacle = Obstacle(obstacle_type, self.asset_adapter, size=size_override)
         print("[SPAWN] Criando obstáculo:", obstacle_type)
+
+        # Debug: log visual rect and collision rect so we can verify sizes/positions
+        try:
+            crect = obstacle.get_collision_rect()
+            print(f"[SPAWN_DEBUG] type={obstacle_type} visual_midbottom={obstacle.rect.midbottom} visual_size={obstacle.rect.size} coll_midbottom={crect.midbottom} coll_size={crect.size}")
+        except Exception:
+            print(f"[SPAWN_DEBUG] type={obstacle_type} visual_midbottom={obstacle.rect.midbottom} visual_size={obstacle.rect.size}")
 
 
         min_x = GameConfig.SCREEN_WIDTH + GameConfig.OBSTACLE_MIN_GAP
@@ -76,7 +97,7 @@ class GameManager:
         if (current_time - self.last_obstacle_time > GameConfig.OBSTACLE_SPAWN_RATE / self.game_speed and
             len(self.obstacles) < GameConfig.OBSTACLE_COUNT):
             
-            self.spawn_obstacle()
+            self.spawn_obstacle(player_rect)
             self.last_obstacle_time = current_time
 
         obstacles_to_remove = []
@@ -90,9 +111,35 @@ class GameManager:
 
             if obstacle.update(delta_time):
                 obstacles_to_remove.append(obstacle)
-            elif player_rect.colliderect(obstacle.rect):
-                self.game_over()
-                return
+            else:
+                # Use the tightened collision rect from the obstacle
+                try:
+                    coll_rect = obstacle.get_collision_rect()
+                except Exception:
+                    coll_rect = obstacle.rect
+
+                # Debug: report collision check details
+                try:
+                    player_on_ground = (player_rect.bottom >= GameConfig.GROUND_LEVEL)
+                except Exception:
+                    player_on_ground = None
+
+                print(f"[COLLISION_CHECK] obst_type={obstacle.type} player_bottom={player_rect.bottom} ground={GameConfig.GROUND_LEVEL} player_on_ground={player_on_ground} coll_rect={coll_rect}")
+
+                if player_rect.colliderect(coll_rect):
+                    print(f"[COLLISION] type={obstacle.type} player_bottom={player_rect.bottom} coll_rect={coll_rect}")
+                    # Save a screenshot of the current display so we can inspect the exact frame
+                    try:
+                        surface = pygame.display.get_surface()
+                        if surface:
+                            path = "collision_debug.png"
+                            pygame.image.save(surface, path)
+                            print(f"[COLLISION_DEBUG] screenshot saved to: {path}")
+                    except Exception as e:
+                        print(f"[COLLISION_DEBUG] failed to save screenshot: {e}")
+
+                    self.game_over()
+                    return
 
         for obstacle in obstacles_to_remove:
             self.obstacles.remove(obstacle)

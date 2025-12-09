@@ -38,19 +38,29 @@ class GameConfig:
     OBSTACLE_MAX_GAP = 800
     OBSTACLE_SPEED = 6.0        # Mais rápido
 
+    # Fatores de proporção (para referência) - used to compute obstacle sizes
+    PLAYER_TO_CACTUS_RATIO = 0.5    # Cacto = 50% do jogador
+    PLAYER_TO_BIRD_RATIO = 0.35     # Pássaro = 35% do jogador
+
+    # Debug helpers
+    DEBUG_SHOW_COLLISIONS = True
+
     # Cactos - PROPORCIONAIS ao jogador (~50% da altura do jogador)
     CACTUS_COUNT = 3
-    CACTUS_WIDTH = 120   # AUMENTADO: ~50% da largura do jogador
-    CACTUS_HEIGHT = 200  # AUMENTADO: ~50% da altura do jogador
+    # Calculate cactus size proportional to player dimensions
+    CACTUS_WIDTH = int(PLAYER_WIDTH * PLAYER_TO_CACTUS_RATIO)
+    CACTUS_HEIGHT = int(PLAYER_HEIGHT * PLAYER_TO_CACTUS_RATIO)
 
     # Pássaros - PROPORCIONAIS ao jogador (~35% do tamanho do jogador)
     BIRD_COUNT = 2
-    BIRD_WIDTH = 80      # NOVO: largura específica
-    BIRD_HEIGHT = 80     # NOVO: altura específica
-    
-    # Alturas ajustadas para tela 1080p
-    BIRD_MIN_HEIGHT = 400  # MAIS ALTO: para tela maior
-    BIRD_MAX_HEIGHT = 650  # MAIS ALTO: para tela maior
+    # Bird size proportional to player
+    BIRD_WIDTH = int(PLAYER_WIDTH * PLAYER_TO_BIRD_RATIO)
+    BIRD_HEIGHT = int(PLAYER_HEIGHT * PLAYER_TO_BIRD_RATIO)
+
+    # Bird flight range: position birds low enough that player must jump to avoid them.
+    # Range anchored to ground level and player height so it scales with screen/player size.
+    BIRD_MIN_HEIGHT = int(GROUND_LEVEL - PLAYER_HEIGHT * 0.6)
+    BIRD_MAX_HEIGHT = int(GROUND_LEVEL - PLAYER_HEIGHT * 0.25)
 
     # Pontuação
     SCORE_MULTIPLIER = 0.15  # Aumentado para tela maior
@@ -61,6 +71,4 @@ class GameConfig:
     INITIAL_GAME_SPEED = 1.0
     MAX_GAME_SPEED = 3.5           # Aumentado
     
-    # Fatores de proporção (para referência)
-    PLAYER_TO_CACTUS_RATIO = 0.5    # Cacto = 50% do jogador
-    PLAYER_TO_BIRD_RATIO = 0.35     # Pássaro = 35% do jogador
+    # (ratios already defined above)

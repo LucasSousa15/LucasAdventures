@@ -54,8 +54,12 @@ class GameState(GameState):
                         self.game_manager.toggle_pause()
                 
                 elif event.key == pygame.K_F1:
-                    # Debug: mostrar hitboxes
-                    self.player.draw_hitbox = not self.player.draw_hitbox
+                    # Debug: toggle hitboxes for player and obstacles
+                    from game.utils.config import GameConfig
+                    current = getattr(GameConfig, "DEBUG_SHOW_COLLISIONS", False)
+                    GameConfig.DEBUG_SHOW_COLLISIONS = not current
+                    # keep player's explicit hitbox flag in sync for convenience
+                    self.player.draw_hitbox = GameConfig.DEBUG_SHOW_COLLISIONS
                 
                 elif event.key == pygame.K_h:
                     # Mostrar/ocultar instruções

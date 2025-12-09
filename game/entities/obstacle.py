@@ -7,10 +7,13 @@ from game.utils.config import GameConfig
 
 
 class Obstacle(pygame.sprite.Sprite):
-    def __init__(self, obstacle_type: str, asset_adapter):
+    def __init__(self, obstacle_type: str, asset_adapter, size: tuple = None):
         super().__init__()
 
-        
+        # optional override size: (width, height). If provided, obstacle will use
+        # this size instead of the static values in GameConfig. This allows
+        # dynamic sizing based on the player's current size.
+        self.override_size = size
 
         self.type = obstacle_type
         self.asset_adapter = asset_adapter
@@ -23,7 +26,21 @@ class Obstacle(pygame.sprite.Sprite):
 
         self.rect.midbottom = (self.x, self.y)
 
+        # Logical movement speed (will be adjusted by GameManager)
         self.speed = GameConfig.OBSTACLE_SPEED
+
+        # Create a tighter collision/hitbox so obstacles are not "ghosts".
+        # We keep the visual `rect` for drawing, but use `collision_rect` for collisions.
+        if self.type == "cactus":
+            cw = int(self.rect.width * 0.75)
+            ch = int(self.rect.height * 0.9)
+        else:  # bird
+            cw = int(self.rect.width * 0.6)
+            ch = int(self.rect.height * 0.6)
+
+        self.collision_rect = pygame.Rect(0, 0, max(1, cw), max(1, ch))
+        # align collision box to the sprite's bottom center
+        self.collision_rect.midbottom = self.rect.midbottom
 
 
 
@@ -34,12 +51,18 @@ class Obstacle(pygame.sprite.Sprite):
             return asset
 
         if self.type == "cactus":
-            width = GameConfig.CACTUS_WIDTH
-            height = GameConfig.CACTUS_HEIGHT
+            if self.override_size:
+                width, height = self.override_size
+            else:
+                width = GameConfig.CACTUS_WIDTH
+                height = GameConfig.CACTUS_HEIGHT
             color = (0, 200, 0, 255)  # Verde forte (RGBA)
         else:  # bird
-            width = GameConfig.BIRD_WIDTH
-            height = GameConfig.BIRD_HEIGHT
+            if self.override_size:
+                width, height = self.override_size
+            else:
+                width = GameConfig.BIRD_WIDTH
+                height = GameConfig.BIRD_HEIGHT
             color = (200, 50, 50, 255)  # Vermelho (RGBA)
 
         surface = pygame.Surface((width, height), pygame.SRCALPHA)
@@ -78,10 +101,13 @@ class Obstacle(pygame.sprite.Sprite):
                 else:
                     return None
 
-            if self.type == "cactus":
-                size = (GameConfig.CACTUS_WIDTH, GameConfig.CACTUS_HEIGHT)
-            else:  # bird
-                size = (GameConfig.BIRD_WIDTH, GameConfig.BIRD_HEIGHT)
+            if self.override_size:
+                size = tuple(self.override_size)
+            else:
+                if self.type == "cactus":
+                    size = (GameConfig.CACTUS_WIDTH, GameConfig.CACTUS_HEIGHT)
+                else:  # bird
+                    size = (GameConfig.BIRD_WIDTH, GameConfig.BIRD_HEIGHT)
 
             return pygame.transform.scale(image, size)
 
@@ -111,6 +137,11 @@ class Obstacle(pygame.sprite.Sprite):
 
 
         self.rect.midbottom = (int(self.x), int(self.y))
+        # keep collision rect aligned with visual rect
+        try:
+            self.collision_rect.midbottom = self.rect.midbottom
+        except Exception:
+            pass
 
         if self.rect.right < 0:
 
@@ -127,26 +158,68 @@ class Obstacle(pygame.sprite.Sprite):
     def draw(self, graphics_adapter):
         
 
-        try:
-            img_size = (self.image.get_width(), self.image.get_height())
-        except Exception:
-            img_size = None
-        print(f"[DRAW] type={self.type} rect={self.rect} img_size={img_size}")
-
+        # Draw the visual sprite (collision handled separately)
+        drew = False
+        # try adapter draw_sprite first
         if hasattr(graphics_adapter, "draw_sprite"):
             try:
                 graphics_adapter.draw_sprite(self.image, int(self.rect.x), int(self.rect.y))
-                return
+                drew = True
             except Exception:
-                pass
+                drew = False
 
-        if hasattr(graphics_adapter, "screen") and isinstance(graphics_adapter.screen, pygame.Surface):
-            graphics_adapter.screen.blit(self.image, self.rect)
-            return
+        # fallback to direct blit
+        if not drew:
+            if hasattr(graphics_adapter, "screen") and isinstance(graphics_adapter.screen, pygame.Surface):
+                graphics_adapter.screen.blit(self.image, self.rect)
+                drew = True
+            elif isinstance(graphics_adapter, pygame.Surface):
+                graphics_adapter.blit(self.image, self.rect)
+                drew = True
 
-        if isinstance(graphics_adapter, pygame.Surface):
-            graphics_adapter.blit(self.image, self.rect)
-            return
+        if not drew:
+            raise AttributeError("graphics_adapter não possui draw_sprite nem screen.blit; passe o adapter correto.")
 
-        raise AttributeError("graphics_adapter não possui draw_sprite nem screen.blit; passe o adapter correto.")
+        # Draw collision rectangle for debugging if enabled
+        try:
+            if getattr(GameConfig, "DEBUG_SHOW_COLLISIONS", False):
+                # prefer adapter draw_rect if available
+                if hasattr(graphics_adapter, "draw_rect"):
+                    graphics_adapter.draw_rect((255, 0, 0), self.collision_rect, 2)
+                elif hasattr(graphics_adapter, "screen") and isinstance(graphics_adapter.screen, pygame.Surface):
+                    pygame.draw.rect(graphics_adapter.screen, (255, 0, 0), self.collision_rect, 2)
+        except Exception:
+            pass
+
+        # If the sprite appears fully transparent (no opaque pixels), draw a visible fallback
+        # so the player can see and avoid the obstacle.
+        try:
+            bound = self.image.get_bounding_rect()
+            if bound.width == 0 or bound.height == 0:
+                # draw a semi-opaque placeholder rectangle at the visual rect
+                placeholder = pygame.Surface((self.rect.width, self.rect.height), pygame.SRCALPHA)
+                placeholder.fill((200, 0, 0, 180))
+                if hasattr(graphics_adapter, "screen") and isinstance(graphics_adapter.screen, pygame.Surface):
+                    graphics_adapter.screen.blit(placeholder, self.rect)
+                    # label
+                    try:
+                        font = pygame.font.Font(None, 20)
+                        txt = font.render("OBST", True, (255, 255, 255))
+                        graphics_adapter.screen.blit(txt, (self.rect.x + 4, self.rect.y + 4))
+                    except Exception:
+                        pass
+                else:
+                    # fallback to adapter draw_sprite with placeholder
+                    try:
+                        graphics_adapter.draw_sprite(placeholder, int(self.rect.x), int(self.rect.y))
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+
+    def get_collision_rect(self):
+        """Return the current collision rect (keeps it in sync with visual rect)."""
+        return self.collision_rect
+
+        
     
