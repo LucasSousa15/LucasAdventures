@@ -2,26 +2,26 @@ import pygame
 from abc import ABC, abstractmethod
 
 class InputAdapter(ABC):
-    
-    
+
+
     @abstractmethod
     def get_movement(self):
-        
+
         pass
-    
+
     @abstractmethod
     def get_menu_input(self):
-        
+
         pass
-    
+
     @abstractmethod
     def should_quit(self):
-        
+
         pass
 
 class KeyboardInputAdapter(InputAdapter):
-    
-    
+
+
     def __init__(self, config=None):
         self.config = config or {
             'left': pygame.K_LEFT,
@@ -30,7 +30,7 @@ class KeyboardInputAdapter(InputAdapter):
             'pause': pygame.K_ESCAPE,
             'action': pygame.K_LCTRL
         }
-    
+
     def get_movement(self):
         keys = pygame.key.get_pressed()
         dx = 0
@@ -38,11 +38,11 @@ class KeyboardInputAdapter(InputAdapter):
             dx = -1
         if keys[self.config['right']]:
             dx = 1
-        
+
         jump_pressed = keys[self.config['jump']]
-        
+
         return dx, 0, jump_pressed
-    
+
     def get_menu_input(self):
         events = pygame.event.get()
         for event in events:
@@ -56,7 +56,7 @@ class KeyboardInputAdapter(InputAdapter):
                 elif event.key == pygame.K_ESCAPE:
                     return 'back'
         return None
-    
+
     def should_quit(self):
         for event in pygame.event.get(pygame.QUIT):
             return True

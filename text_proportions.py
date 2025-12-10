@@ -14,7 +14,7 @@ def test_proportions():
     pygame.init()
     screen = pygame.display.set_mode((GameConfig.SCREEN_WIDTH, GameConfig.SCREEN_HEIGHT))
     clock = pygame.time.Clock()
-    
+
     adapter = PygameAssetAdapter()
 
     player = Player(GameConfig.SCREEN_WIDTH // 2, GameConfig.GROUND_LEVEL, adapter)
@@ -23,10 +23,10 @@ def test_proportions():
 
     cactus.x = 400
     cactus.y = cactus.get_initial_y()
-    
+
     bird.x = 600
     bird.y = bird.get_initial_y()
-    
+
     print("\n=== TESTE DE PROPORÇÕES ===")
     print(f"Tela: {GameConfig.SCREEN_WIDTH}x{GameConfig.SCREEN_HEIGHT}")
     print(f"Chão (Y): {GameConfig.GROUND_LEVEL}")
@@ -40,11 +40,11 @@ def test_proportions():
     print(f"\nPássaro:")
     print(f"  Tamanho: {bird.image.get_width()}x{bird.image.get_height()}")
     print(f"  Posição: ({bird.rect.x}, {bird.rect.y})")
-    
+
     running = True
     while running:
         delta_time = clock.tick(60) / 1000.0
-        
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -58,7 +58,7 @@ def test_proportions():
         class SimpleGraphicsAdapter:
             def draw_sprite(self, img, x, y):
                 screen.blit(img, (x, y))
-        
+
         player.draw(SimpleGraphicsAdapter())
         cactus.draw(SimpleGraphicsAdapter())
         bird.draw(SimpleGraphicsAdapter())
@@ -73,13 +73,13 @@ def test_proportions():
             "Linha vermelha: nível do chão",
             "Pressione ESC para sair"
         ]
-        
+
         for i, text in enumerate(info):
             text_surf = font.render(text, True, (255, 255, 255))
             screen.blit(text_surf, (10, 10 + i * 30))
-        
+
         pygame.display.flip()
-    
+
     pygame.quit()
 
 if __name__ == "__main__":
